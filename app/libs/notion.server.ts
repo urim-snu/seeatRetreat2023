@@ -16,6 +16,27 @@ export async function getMoimList() {
   return response.results;
 }
 
-getMoimList().then((results) => {
-  console.log(results);
-});
+// Clear all data in a database in Notion
+export const clearAllDataInDB = async (databaseId: string): Promise<void> => {
+  try {
+    // Get all pages in the database
+    const response = await notion.databases.query({
+      database_id: databaseId,
+    });
+
+    // Delete each page in the database
+    const deletePromises = response.results.map((page) =>
+      notion.pages.update({
+        page_id: page.id,
+        archived: true, // Move the page to the trash instead of permanently deleting it
+      })
+    );
+
+    // Wait for all delete operations to complete
+    await Promise.all(deletePromises);
+
+    console.log("All data cleared successfully.");
+  } catch (error) {
+    console.error("Error clearing data:", error);
+  }
+};

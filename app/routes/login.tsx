@@ -13,19 +13,21 @@ export const loader = async ({ request }: LoaderArgs) => {
   return json({});
 };
 
+const MASTER_PASSWORD = process.env.MASTER_PASSWORD || "seeat";
+
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
-  const email = formData.get("email");
+  const email = "woorjb133@gmail.com";
   const password = formData.get("password");
   const redirectTo = safeRedirect(formData.get("redirectTo"), "/");
   const remember = formData.get("remember");
 
-  if (!validateEmail(email)) {
-    return json(
-      { errors: { email: "Email is invalid", password: null } },
-      { status: 400 }
-    );
-  }
+  // if (!validateEmail(email)) {
+  //   return json(
+  //     { errors: { email: "Email is invalid", password: null } },
+  //     { status: 400 }
+  //   );
+  // }
 
   if (typeof password !== "string" || password.length === 0) {
     return json(
@@ -50,6 +52,13 @@ export const action = async ({ request }: ActionArgs) => {
     );
   }
 
+  if (!user) {
+    return json(
+      { errors: { email: "Invalid email or password", password: null } },
+      { status: 400 }
+    );
+  }
+
   return createUserSession({
     redirectTo,
     remember: remember === "on" ? true : false,
@@ -62,15 +71,13 @@ export const meta: V2_MetaFunction = () => [{ title: "Login" }];
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/notes";
+  const redirectTo = searchParams.get("redirectTo") || "/";
   const actionData = useActionData<typeof action>();
-  const emailRef = useRef<HTMLInputElement>(null);
+  // const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (actionData?.errors?.email) {
-      emailRef.current?.focus();
-    } else if (actionData?.errors?.password) {
+    if (actionData?.errors?.password) {
       passwordRef.current?.focus();
     }
   }, [actionData]);
@@ -79,34 +86,6 @@ export default function LoginPage() {
     <div className="flex min-h-full flex-col justify-center">
       <div className="mx-auto w-full max-w-md px-8">
         <Form method="post" className="space-y-6">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email address
-            </label>
-            <div className="mt-1">
-              <input
-                ref={emailRef}
-                id="email"
-                required
-                autoFocus={true}
-                name="email"
-                type="email"
-                autoComplete="email"
-                aria-invalid={actionData?.errors?.email ? true : undefined}
-                aria-describedby="email-error"
-                className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
-              />
-              {actionData?.errors?.email ? (
-                <div className="pt-1 text-red-700" id="email-error">
-                  {actionData.errors.email}
-                </div>
-              ) : null}
-            </div>
-          </div>
-
           <div>
             <label
               htmlFor="password"
@@ -155,7 +134,7 @@ export default function LoginPage() {
                 Remember me
               </label>
             </div>
-            <div className="text-center text-sm text-gray-500">
+            {/* <div className="text-center text-sm text-gray-500">
               Don't have an account?{" "}
               <Link
                 className="text-blue-500 underline"
@@ -166,7 +145,7 @@ export default function LoginPage() {
               >
                 Sign up
               </Link>
-            </div>
+            </div> */}
           </div>
         </Form>
       </div>
