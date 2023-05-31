@@ -10,10 +10,11 @@ import { useEffect } from "react";
 import { logout, requireUser, requireUserId } from "~/session.server";
 
 import { useOptionalUser } from "~/utils";
+import { fetchAllBasicData, fetchAllSeedGroupData } from "~/utils/basicSheet";
 import { fetchAllCarpoolData } from "~/utils/carpool";
 import { fetchAllPreSeedData } from "~/utils/preSeed";
 import { fetchAllRiderData } from "~/utils/rider";
-import { fetchAllSeedGroupData } from "~/utils/seedGroup";
+
 import { fetchAllShuttleData } from "~/utils/shuttle";
 
 export const meta: V2_MetaFunction = () => [
@@ -41,6 +42,8 @@ export const action = async ({ request }: ActionArgs) => {
       return await fetchAllSeedGroupData();
     case "fetchAllPreSeed":
       return await fetchAllPreSeedData();
+    case "fetchAllBasicData":
+      return await fetchAllBasicData();
     case "logout":
       return await logout(request);
   }
@@ -84,9 +87,15 @@ export default function Index() {
         <div className="mt-8 flex flex-col items-center justify-center">
           <h2 className="text-3xl font-bold">수양관 라이더 관리</h2>
           <div className="mt-4">
-            <button className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
-              수양관 라이더 정보 전부 가져오기
-            </button>
+            <Form method="post">
+              <input type="hidden" name="action" value="fetchAllRider" />
+              <button
+                type="submit"
+                className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+              >
+                수양관 라이더 정보 전부 가져오기
+              </button>
+            </Form>
           </div>
         </div>
 
@@ -100,13 +109,19 @@ export default function Index() {
           </div>
         </div>
 
-        {/* 씨앗모임 관리 */}
+        {/* 신청자 데이터 관리*/}
         <div className="mt-8 flex flex-col items-center justify-center">
           <h2 className="text-3xl font-bold">참가자 관리</h2>
           <div className="mt-4">
-            <button className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
-              씨앗모임, 프리씨드, 숙소 정보 가져오기
-            </button>
+            <Form method="post">
+              <input type="hidden" name="action" value="fetchAllBasicData" />
+              <button
+                type="submit"
+                className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+              >
+                기본 정보, 씨앗모임, 숙소 정보 가져오기
+              </button>
+            </Form>
           </div>
         </div>
 

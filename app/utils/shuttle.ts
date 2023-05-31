@@ -1,17 +1,23 @@
 import { json } from "@remix-run/node";
-import { clearAllDataInDB, notion } from "~/libs/notion.server";
+import {
+  clearAllDataInDB,
+  notion,
+  putDataIntoNotionDB,
+} from "~/libs/notion.server";
 import { getShuttleData } from "~/libs/sheet.server";
 
 export const fetchAllShuttleData = async () => {
+  const databaseId = process.env.NOTION_SHUTTLE_DB_ID || "";
+
   // 노션 데이터 전부 날리기
-  await clearAllDataInDB(process.env.NOTION_SHUTTLE_DB_ID || "");
+  await clearAllDataInDB(databaseId);
 
   // 구글 스프레드시트 데이터 가져오기
   const notionData = await getShuttleData();
 
   // put notionData elements into notion db, concurrently
   const putNotionDataPromises = notionData.map((properties) =>
-    putShuttleDataIntoNotionDB(properties)
+    putDataIntoNotionDB(databaseId, properties)
   );
 
   return json(
@@ -42,33 +48,4 @@ export const postShuttleData = async () => {
       status: 200,
     }
   );
-};
-
-const putShuttleDataIntoNotionDB = async (properties: any) => {
-  // put one row into notion db
-
-  await queryDatabaseProperties(process.env.NOTION_SHUTTLE_DB_ID || "");
-
-  const result = await notion.pages.create({
-    parent: {
-      database_id: process.env.NOTION_SHUTTLE_DB_ID || "",
-    },
-    properties,
-  });
-
-  // console.log(JSON.stringify(result));
-  return result;
-};
-
-// query properties of a database in Notion
-export const queryDatabaseProperties = async (databaseId: string) => {
-  try {
-    const response = await notion.databases.retrieve({
-      database_id: databaseId,
-    });
-
-    console.log(JSON.stringify(response));
-  } catch (error) {
-    console.error(error);
-  }
 };

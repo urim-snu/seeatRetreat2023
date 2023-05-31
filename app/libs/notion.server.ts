@@ -40,3 +40,32 @@ export const clearAllDataInDB = async (databaseId: string): Promise<void> => {
     console.error("Error clearing data:", error);
   }
 };
+
+// query properties of a database in Notion
+export const queryDatabaseProperties = async (databaseId: string) => {
+  try {
+    const response = await notion.databases.retrieve({
+      database_id: databaseId,
+    });
+
+    console.log(JSON.stringify(response));
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const putDataIntoNotionDB = async (
+  databaseId: string,
+  properties: any
+) => {
+  // put one row into notion db
+  const result = await notion.pages.create({
+    parent: {
+      database_id: databaseId,
+    },
+    properties,
+  });
+
+  // console.log(JSON.stringify(result));
+  return result;
+};
